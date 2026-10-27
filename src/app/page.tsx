@@ -135,41 +135,55 @@ function ScreenTitle({ children, action }: { children: React.ReactNode; action?:
 function WhatsNew({ onNavigate, onOpen, darkMode, setDarkMode }: { onNavigate: (screen: Screen) => void; onOpen: (title: string) => void; darkMode: boolean; setDarkMode: (mode: boolean) => void }) {
   return (
     <section className="workspace home-workspace">
-      <ScreenTitle>What&apos;s new</ScreenTitle>
-      <div className="new-grid">
-        <article className="tile meeting-tile">
-          <div className="tile-meta"><MessageSquare size={12} /><button onClick={() => onOpen("Meeting details")}><Ellipsis size={15} /></button></div>
-          <p>Meet Mr. Raul Atwood<br />in the office after</p><a onClick={() => onOpen("Meeting details")}>1 Hour</a>
-          <div className="tile-date">16 Apr<small>Monday</small></div>
-          <div className="tile-actions"><button onClick={() => onOpen("Share meeting")}><ArrowRight size={12} /></button><button onClick={() => onOpen("Edit meeting")}><FileText size={12} /></button><button onClick={() => onOpen("Meeting options")}><Ellipsis size={13} /></button></div>
-        </article>
-        <article className="tile earnings-tile">
-          <div className="tile-meta"><Activity size={12} /><button onClick={() => onOpen("Earnings options")}><Ellipsis size={15} /></button></div>
-          <div className="earnings-content">
-            <b className="earnings-amount">$12,487</b><small className="tile-caption">+864 € Comp.</small>
-            <span className="positive">↗ +24%</span>
+      <ScreenTitle action={<div className="home-board-actions"><button onClick={() => onOpen("Add a tile")}><Plus size={16} /> Add a tile</button><button aria-label="Widget settings" onClick={() => onNavigate("Settings")}><Settings size={16} /></button></div>}>What&apos;s new</ScreenTitle>
+      <div className="home-board">
+        <div className="widget-column">
+          <article className="tile meeting-tile">
+            <div className="board-widget-head"><h2>Activity</h2><button aria-label="Meeting options" onClick={() => onOpen("Meeting details")}><Ellipsis size={18} /></button></div>
+            <p>Meet Mr. Raul Atwood<br />in the office after</p>
+            <button className="meeting-countdown" onClick={() => onOpen("Meeting details")}>1 Hour</button>
+            <div className="tile-date">16 Apr<small>Monday</small></div>
+            <div className="tile-actions"><button aria-label="Share meeting" onClick={() => onOpen("Share meeting")}><ArrowRight size={16} /></button><button aria-label="Edit meeting" onClick={() => onOpen("Edit meeting")}><FileText size={16} /></button></div>
+          </article>
+          <article className="tile visits-tile">
+            <div className="board-widget-head"><h2>Visits</h2><button aria-label="View visits" onClick={() => onNavigate("Dashboard")}><Ellipsis size={18} /></button></div>
+            <div className="visits-summary"><strong>8,492</strong><span>+18% <small>This week</small></span></div>
+            <div className="visits-bars" role="img" aria-label="Daily visits: Monday 520, Tuesday 740, Wednesday 630, Thursday 980, Friday 820, Saturday 1120, Sunday 940">
+              {[{ day: "Mon", value: 520 }, { day: "Tue", value: 740 }, { day: "Wed", value: 630 }, { day: "Thu", value: 980 }, { day: "Fri", value: 820 }, { day: "Sat", value: 1120 }, { day: "Sun", value: 940 }].map(({ day, value }) => <div className="visits-bar-column" key={day}><div className="visits-bar-track"><i style={{ height: `${value / 12}%` }} /></div><span>{day}</span></div>)}
+            </div>
+          </article>
+        </div>
+        <div className="widget-column">
+          <article className="tile gradient-tile">
+            <div className="board-widget-head"><h2>Desktop users</h2><button aria-label="User statistics options" onClick={() => onOpen("Statistics options")}><Ellipsis size={18} /></button></div>
+            <div className="desktop-breakdown"><div className="pie-chart" /><div><strong>35%</strong><small>Of all visitors</small></div></div>
+          </article>
+          <article className="tile earnings-tile">
+            <div className="board-widget-head"><h2>Revenue</h2><button aria-label="Revenue options" onClick={() => onOpen("Earnings")}><Ellipsis size={18} /></button></div>
+            <div className="earnings-content"><b className="earnings-amount">$12,487</b><small className="tile-caption">+$864 compared to last month</small></div>
+            <MiniChart />
+            <span className="revenue-change">↗ +24%<small>This month</small></span>
+          </article>
+        </div>
+        <div className="widget-column funds-column">
+          <article className="tile funds-tile">
+            <div className="board-widget-head"><h2>Funds</h2><button aria-label="Funds options" onClick={() => onOpen("Funds Request")}><Ellipsis size={18} /></button></div>
+            <div className="funds-head"><span>Funds Mngr.</span><span>26 Oct<small>Today</small></span></div>
+            <MiniChart />
+            <div className="funds-stats"><span><i className="ring pink-ring" /><b>+13%</b><small>Earnings</small></span><span><i className="ring gray-ring" /><b>-28%</b><small>Expenses</small></span></div>
+          </article>
+          <div className="bottom-widget-pair">
+            <article className="tile sale-tile">
+              <div className="board-widget-head"><h2>Sales</h2><ShoppingBag size={16} /></div>
+              <div className="compact-tile-content"><strong>New Sale!</strong><small>Alexandria</small></div><button className="sale-arrow" aria-label="View sale" onClick={() => onOpen("Sale details")}><ArrowRight size={16} /></button>
+            </article>
+            <article className="tile dark-mode-tile">
+              <div className="board-widget-head"><h2>Dark mode</h2></div>
+              <div className="compact-tile-content"><small>{darkMode ? "Enabled" : "Disabled"}</small></div>
+              <button className={`toggle ${darkMode ? "toggle-on" : ""}`} role="switch" aria-checked={darkMode} aria-label="Toggle dark mode" onClick={() => setDarkMode(!darkMode)}><i /></button>
+            </article>
           </div>
-          <button className="earnings-link" onClick={() => onOpen("Earnings")} aria-label="View earnings analytics"><Ellipsis size={14} /></button>
-        </article>
-        <article className="tile gradient-tile">
-          <div className="tile-meta"><Activity size={12} /><button onClick={() => onOpen("Statistics options")}><Ellipsis size={15} /></button></div>
-          <div className="gradient-content"><div className="pie-chart"><i /></div><strong>35%</strong><small>Desktop users</small></div><span className="tile-spark">⌁⌁</span>
-        </article>
-        <article className="tile funds-tile">
-          <div className="tile-meta"><Activity size={16} /><button aria-label="Funds options" onClick={() => onOpen("Funds Request")}><Ellipsis size={15} /></button></div><div className="funds-head"><span>Funds Mngr.</span><span>26 Oct<small>Today</small></span></div>
-          <MiniChart />
-          <div className="funds-stats"><span><i className="ring pink-ring" /> <b>+13%</b><small>Earnings</small></span><span><i className="ring gray-ring" /> <b>-28%</b><small>Expenses</small></span></div>
-        </article>
-        <article className="tile dark-mode-tile">
-          <div className="tile-meta"><Settings size={12} /><button onClick={() => onOpen("Display options")}><Ellipsis size={15} /></button></div>
-          <div className="compact-tile-content"><strong>Dark Mode</strong><small>{darkMode ? "Enabled" : "Disabled"}</small></div>
-          <button className={`toggle ${darkMode ? "toggle-on" : ""}`} aria-label="Toggle dark mode" onClick={() => setDarkMode(!darkMode)}><i /></button>
-        </article>
-        <article className="tile sale-tile">
-          <div className="tile-meta"><ShoppingBag size={12} /><button onClick={() => onOpen("Sale options")}><Ellipsis size={15} /></button></div>
-          <div className="compact-tile-content"><strong>New Sale!</strong><small>Alexandria</small></div><button className="sale-arrow" onClick={() => onOpen("Sale details")}><ArrowRight size={13} /></button>
-        </article>
-        <div className="tile-actions-grid"><button className="tile add-tile" onClick={() => onOpen("Add a tile")}><span className="tile-add-icon"><Plus size={13} /></span><b>Add a Tile</b></button><button className="tile settings-tile" onClick={() => onNavigate("Settings")}><span className="tile-add-icon"><Settings size={14} /></span><b>Settings</b></button></div>
+        </div>
       </div>
     </section>
   );
