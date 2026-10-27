@@ -69,3 +69,27 @@ test("week and day navigation advance by the chosen interval", () => {
   assert.equal(dateKey(shiftCalendar(anchor, "Day", -1)), "2026-10-26");
   assert.equal(dateKey(anchor), "2026-10-27");
 });
+
+test("store overview derives sales, delivery progress, and stock alerts from records", () => {
+  const before = structuredClone(initialOrders);
+  const result = api.storeOverview(initialOrders, [{ name: "Sold out", stock: 0 }, { name: "Low", stock: 5 }, { name: "Healthy", stock: 100 }]);
+  assert.equal(result.totalOrders, 6);
+  assert.equal(result.successfulOrders, 5);
+  assert.equal(result.grossSales, 667);
+  assert.equal(result.averageOrder, 133.4);
+  assert.equal(result.delivered, 2);
+  assert.equal(result.fulfilmentPercent, 40);
+  assert.equal(result.processing, 2);
+  assert.equal(result.stockAlerts.length, 2);
+  assert.equal(result.outOfStock, 1);
+  assert.equal(result.days.reduce((sum, day) => sum + day.sales, 0), result.grossSales);
+  assert.equal(result.days.reduce((sum, day) => sum + day.orders, 0), result.totalOrders);
+  assert.equal(result.latestSale.id, "#239");
+  assert.deepEqual(initialOrders, before);
+});
+test("store overview handles an empty store without invalid percentages", () => {
+  const result = api.storeOverview([], []);
+  assert.equal(result.totalOrders, 0); assert.equal(result.grossSales, 0);
+  assert.equal(result.averageOrder, 0); assert.equal(result.fulfilmentPercent, 0);
+  assert.equal(result.latestSale, undefined); assert.equal(result.stockAlerts.length, 0);
+});

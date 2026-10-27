@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
-export function SidePanel({ title, subtitle, children, onClose }: { title: string; subtitle?: string; children: React.ReactNode; onClose: () => void }) {
+export function SidePanel({ title, subtitle, children, footer, className = "", onClose }: { title: string; subtitle?: string; children: React.ReactNode; footer?: React.ReactNode; className?: string; onClose: () => void }) {
   const headingId = useId();
   const panel = useRef<HTMLElement>(null);
   const closeCallback = useRef(onClose);
@@ -36,9 +36,10 @@ export function SidePanel({ title, subtitle, children, onClose }: { title: strin
   }, []);
   return createPortal(<div className={`side-panel-layer ${closing ? "panel-closing" : ""}`}>
     <button className="side-panel-scrim" aria-label="Close details" tabIndex={-1} onClick={close} />
-    <section className="store-side-panel" ref={panel} role="dialog" aria-modal="true" aria-labelledby={headingId} tabIndex={-1}>
+    <section className={`store-side-panel ${className}`} ref={panel} role="dialog" aria-modal="true" aria-labelledby={headingId} tabIndex={-1}>
       <header className="side-panel-header"><div><h2 id={headingId}>{title}</h2>{subtitle && <small>{subtitle}</small>}</div><button className="icon-button" aria-label="Close details" onClick={close}><X size={20} /></button></header>
       <div className="side-panel-body">{children}</div>
+      {footer && <footer className="side-panel-footer">{footer}</footer>}
     </section>
   </div>, document.body);
 }

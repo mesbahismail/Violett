@@ -21,6 +21,7 @@ export const initialTickets: Ticket[] = [
   { id: "T-1041", customer: "Megan Bowen", email: "megan@example.com", subject: "Exchange shirt size", status: "Pending", priority: "Normal", messages: [{ id: "1", sender: "customer", body: "Could I exchange my Colorful Shirt for a size L?" }] },
   { id: "T-1040", customer: "Daniel Kim", email: "daniel@example.com", subject: "Payment confirmation", status: "Open", priority: "Normal", messages: [{ id: "1", sender: "customer", body: "Can you confirm that my payment for #234 was received?" }] },
   { id: "T-1039", customer: "Samuel Davis", email: "sam@example.com", subject: "Thanks for your help", status: "Resolved", priority: "Normal", messages: [{ id: "1", sender: "customer", body: "Everything arrived today. Thank you for your help!" }, { id: "2", sender: "agent", body: "You’re very welcome. Enjoy your new boots!" }] },
+  { id: "T-1043", customer: "Christopher Shultz", email: "christopher@example.com", subject: "Help with my order", status: "Open", priority: "Normal", messages: [{ id: "1", sender: "customer", body: "Can you help me with my order?" }] },
 ];
 export type CalendarMode = "Month" | "Week" | "Day";
 export type StoreEvent = { id: string; title: string; date: string; time: string; kind: "promotion" | "payout" | "task" };
@@ -43,4 +44,31 @@ export function calendarDates(anchor: Date, mode: CalendarMode) {
 export function shiftCalendar(anchor: Date, mode: CalendarMode, direction: number) {
   if (mode === "Month") return new Date(anchor.getFullYear(), anchor.getMonth() + direction, 1);
   return new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() + direction * (mode === "Week" ? 7 : 1));
+}
+
+export function storeOverview(orders: StoreOrder[], products: { name: string; stock: number }[]) {
+  const latestOrder = [...orders].sort((a, b) => +new Date(b.placedAt) - +new Date(a.placedAt))[0];
+  const anchor = latestOrder ? new Date(latestOrder.placedAt) : new Date();
+  const days = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() - 6 + index);
+    const matching = orders.filter(order => order.placedAt.slice(0, 10) === dateKey(date));
+    return { date: dateKey(date), label: date.toLocaleDateString("en-GB", { weekday: "short" }), orders: matching.length, sales: matching.filter(order => order.status !== "Cancelled").reduce((sum, order) => sum + order.total, 0) };
+  });
+  const periodOrders = orders.filter(order => days.some(day => day.date === order.placedAt.slice(0, 10)));
+  const completedSales = periodOrders.filter(order => order.status !== "Cancelled");
+  const grossSales = completedSales.reduce((sum, order) => sum + order.total, 0);
+  const delivered = completedSales.filter(order => order.status === "Delivered").length;
+  return {
+    latestSale: completedSales.sort((a, b) => +new Date(b.placedAt) - +new Date(a.placedAt))[0],
+    days,
+    totalOrders: periodOrders.length,
+    successfulOrders: completedSales.length,
+    grossSales,
+    averageOrder: completedSales.length ? grossSales / completedSales.length : 0,
+    delivered,
+    fulfilmentPercent: completedSales.length ? Math.round(delivered / completedSales.length * 100) : 0,
+    processing: completedSales.filter(order => order.status === "Processing").length,
+    stockAlerts: products.filter(product => product.stock <= 10),
+    outOfStock: products.filter(product => product.stock === 0).length,
+  };
 }

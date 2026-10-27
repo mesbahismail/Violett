@@ -21,7 +21,7 @@ function loadTs(file, extra = "") {
   new Function("exports", "require", outputText)(exports, localRequire);
   return exports;
 }
-const screens = loadTs(resolve(root, "src/app/page.tsx"), "\nexport { OrdersScreen, ProductsScreen, WalletScreen, AnalyticsScreen, SupportScreen, CalendarScreen, productData };\n");
+const screens = loadTs(resolve(root, "src/app/page.tsx"), "\nexport { StoreDashboard, OrdersScreen, ProductsScreen, WalletScreen, AnalyticsScreen, SupportScreen, CalendarScreen, productData };\n");
 const { initialOrders, initialTickets, initialEvents } = loadTs(resolve(root, "src/app/store-data.ts"));
 const noop = () => {};
 const render = (Component, props) => renderToStaticMarkup(React.createElement(Component, props));
@@ -80,4 +80,13 @@ test("calendar renders real month, week, and day structures", () => {
     if (mode === "Month") assert.ok((html.match(/store-calendar-cell/g) ?? []).length >= 28);
     else assert.equal((html.match(/class="agenda-day"/g) ?? []).length, mode === "Week" ? 7 : 1);
   }
+});
+
+test("home uses store-specific widgets and computed figures rather than generic mock metrics", () => {
+  const html = render(screens.StoreDashboard, { orders: initialOrders, tickets: initialTickets, events: initialEvents, products: screens.productData, onNavigate: noop });
+  for (const title of ["Store updates", "Order volume", "Fulfilment", "Gross sales", "Sales overview", "Latest order", "Stock alerts"]) assert.ok(html.includes(title), title);
+  for (const figure of ["$667.00", "$133.40", "40%", "2/5 delivered", "1 out of stock"]) assert.ok(html.includes(figure), figure);
+  assert.ok(!html.includes("Desktop users"));
+  assert.ok(!html.includes("8,492"));
+  assert.ok(!html.includes("Dark mode"));
 });

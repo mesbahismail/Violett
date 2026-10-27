@@ -4,19 +4,17 @@ import { Children, useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import { createPortal } from "react-dom";
 import { SidePanel } from "./components/side-panel";
-import { initialOrders, initialTickets, initialEvents, selectOrders, money, dateKey, calendarDates, shiftCalendar, type StoreOrder, type OrderStatus, type OrderSort, type Ticket, type CalendarMode, type StoreEvent } from "./store-data";
+import { initialOrders, initialTickets, initialEvents, selectOrders, storeOverview, money, dateKey, calendarDates, shiftCalendar, type StoreOrder, type OrderStatus, type OrderSort, type Ticket, type CalendarMode, type StoreEvent } from "./store-data";
 import {
   Activity,
   ArrowLeft,
   ArrowUpRight,
-  Monitor,
   Package,
+  PackageCheck,
   Ticket as TicketIcon,
-  Tag,
   TrendingUp,
   SlidersHorizontal,
   Send,
-  Moon,
   ChartColumnIncreasing,
   CalendarDays,
   Check,
@@ -29,6 +27,9 @@ import {
   LayoutGrid,
   List,
   LogOut,
+  LockKeyhole,
+  UserRound,
+  Mail,
   Menu,
   MessageSquare,
   Plus,
@@ -64,7 +65,10 @@ export default function Home() {
   const [tooltip, setTooltip] = useState<{ text: string; top: number } | null>(null);
   const [dialog, setDialog] = useState("");
   const [profileOpen, setProfileOpen] = useState(false);
+  const [profile, setProfile] = useState({ name: "Bradley Edmur", role: "Store owner", email: "bradley@violett.store", phone: "+1 610 750 4463", timezone: "Africa/Casablanca" });
   const [noticeOpen, setNoticeOpen] = useState(false);
+  const [activityRead, setActivityRead] = useState(false);
+  const [requestDecision, setRequestDecision] = useState<"approved" | "declined" | null>(null);
   const [darkMode, setDarkMode] = useState(true);
   const [calendarMode, setCalendarMode] = useState<CalendarMode>("Month");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -117,8 +121,7 @@ export default function Home() {
         <div className="top-actions">
           <button className="icon-button" aria-label="Support tickets" onClick={() => goTo("Support tickets")}><MessageSquare size={15} /></button>
           <div className="relative">
-            <button className="icon-button has-indicator" aria-label="Activity" title="Activity" aria-expanded={noticeOpen} onClick={() => setNoticeOpen(!noticeOpen)}><Activity size={16} /><i aria-hidden="true" /></button>
-            {noticeOpen && <div className="floating-menu notice-menu"><div className="menu-title">Store activity <button onClick={() => setNoticeOpen(false)} aria-label="Close"><X size={13} /></button></div><button className="notice-row" onClick={() => goTo("Orders")}><span className="round-icon pink"><ShoppingBag size={13} /></span><span><b>New order {orders[0].id}</b><small>{orders[0].customer} · {money(orders[0].total)}</small></span></button><button className="notice-row" onClick={() => goTo("Support tickets")}><span className="round-icon purple"><TicketIcon size={13} /></span><span><b>Support tickets</b><small>{tickets.filter(ticket => ticket.status !== "Resolved").length} conversations need attention</small></span></button><button className="notice-row" onClick={() => goTo("Calendar")}><span className="round-icon pink"><Tag size={13} /></span><span><b>Autumn promotion is live</b><small>View your store calendar</small></span></button></div>}
+            <button className="icon-button has-indicator" aria-label="Activity" title="Activity" aria-expanded={noticeOpen} onClick={() => { setProfileOpen(false); setNoticeOpen(!noticeOpen); }}><Activity size={16} />{!activityRead && <i aria-hidden="true" />}</button>
 
           </div>
           <button className="add-button" aria-label="Create new" onClick={() => setDialog("Create new")}><Plus size={16} /></button>
@@ -139,14 +142,14 @@ export default function Home() {
           <button className={`rail-button ${screen === "Settings" ? "rail-active" : ""}`} aria-label="Settings" {...railHint("Settings")} onClick={() => goTo("Settings")}><Settings size={20} /></button>
           <button className="rail-button" aria-label="Help" {...railHint("Help")} onClick={() => { setTooltip(null); setDialog("Help"); setProfileOpen(false); }}><CircleHelp size={20} /></button>
           <div className="rail-profile">
-            <button className="rail-button profile-button" aria-label="Open profile" aria-expanded={profileOpen} {...railHint("Profile")} onClick={() => { setTooltip(null); setProfileOpen(!profileOpen); }}><span className="profile-photo">BE</span></button>
-            {profileOpen && <div className="floating-menu profile-menu"><div className="profile-card"><span className="profile-large">BE</span><b>Bradley Edmur</b><small>Chief Designer</small><span className="edit-tag">EDIT PROFILE</span></div><button onClick={() => { goTo("Settings"); }}>Settings <Settings size={13} /></button><button onClick={() => setDialog("Sign out")}>Sign out <LogOut size={13} /></button></div>}
+            <button className="rail-button profile-button" aria-label="Open profile" aria-expanded={profileOpen} {...railHint("Profile")} onClick={() => { setTooltip(null); setNoticeOpen(false); setProfileOpen(!profileOpen); }}><span className="profile-photo">{profile.name.split(" ").filter(Boolean).slice(0, 2).map(part => part[0]).join("")}</span></button>
+
           </div>
         </div>
       </aside>
 
       <div className="screen-content">
-        {screen === "Dashboard" && <StoreDashboard orders={orders} tickets={tickets} onNavigate={goTo} darkMode={darkMode} setDarkMode={setDarkMode} />}
+        {screen === "Dashboard" && <StoreDashboard orders={orders} tickets={tickets} products={products} events={events} onNavigate={goTo} />}
         {screen === "Analytics" && <AnalyticsScreen orders={orders} onNavigate={goTo} />}
         {screen === "Wallet" && <WalletScreen products={products} />}
         {screen === "Products" && <ProductsScreen search={search} products={products} onCreate={(product) => setProducts((current) => [...current, product])} />}
@@ -156,10 +159,37 @@ export default function Home() {
         {screen === "Settings" && <SettingsScreen darkMode={darkMode} setDarkMode={setDarkMode} />}
       </div>
 
+      {noticeOpen && <ActivityPanel orders={orders} products={products} requestDecision={requestDecision} onDecision={setRequestDecision} read={activityRead} onMarkRead={() => setActivityRead(true)} onNavigate={goTo} onClose={() => setNoticeOpen(false)} />}
+      {profileOpen && <ProfilePanel profile={profile} onSave={setProfile} products={products.length} orders={orders.length} tickets={tickets.filter(ticket => ticket.status !== "Resolved").length} onClose={() => setProfileOpen(false)} onSettings={() => goTo("Settings")} onSignOut={() => { setProfileOpen(false); setDialog("Sign out"); }} />}
       {tooltip && createPortal(<span className="rail-tooltip" role="tooltip" style={{ top: tooltip.top }}>{tooltip.text}</span>, document.body)}
       {dialog && <Dialog title={dialog} onClose={() => setDialog("")} />}
     </main>
   );
+}
+
+function ActivityPanel({ orders, products, requestDecision, onDecision, read, onMarkRead, onNavigate, onClose }: { orders: StoreOrder[]; products: Product[]; requestDecision: "approved" | "declined" | null; onDecision: (decision: "approved" | "declined") => void; read: boolean; onMarkRead: () => void; onNavigate: (screen: Screen) => void; onClose: () => void }) {
+  const summary = storeOverview(orders, products);
+  const latestOrder = summary.latestSale;
+  return <SidePanel title="Activity" subtitle={read ? "You’re all caught up" : "4 unread updates"} className="activity-side-panel" onClose={onClose} footer={<button className="activity-mark-read" onClick={onMarkRead} disabled={read}><Check size={16} />{read ? "All updates read" : "Mark all as read"}</button>}>
+    <div className="activity-timeline">
+      <article className="activity-event-card"><span className="activity-event-icon event-icon-pink"><Wallet size={16} /></span><time>4 min ago</time><h3>Antalya Saint sent you a new funds request</h3><div className="activity-request-details"><div><strong>$16,000</strong><small>Via credit card</small></div>{requestDecision ? <span className={`activity-request-result ${requestDecision}`} role="status">{requestDecision === "approved" ? "Approved" : "Declined"}<small>Preview only</small></span> : <div className="activity-request-actions"><button aria-label="Decline funds request in preview" title="Decline request" onClick={() => onDecision("declined")}><X size={14} /></button><button className="request-approve" aria-label="Approve funds request in preview" title="Approve request" onClick={() => onDecision("approved")}><Check size={14} /></button></div>}</div></article>
+      <article className="activity-event-card"><span className="activity-event-icon event-icon-purple"><MessageSquare size={16} /></span><time>4 min ago</time><button className="activity-event-link" onClick={() => onNavigate("Support tickets")}><h3>Christopher Shultz sent you a new message</h3><ArrowUpRight size={14} /></button><p>Can you help me with my order?</p></article>
+      <article className="activity-event-card"><span className="activity-event-icon event-icon-pink"><ChartColumnIncreasing size={16} /></span><time>4 min ago</time><button className="activity-event-link" onClick={() => onNavigate("Analytics")}><h3>You have new sales statistics</h3><ArrowUpRight size={14} /></button><div className="activity-sales-summary"><div className="activity-stat-chart"><span>{money(Math.max(0, ...summary.days.map(day => day.sales)))}</span><MiniChart values={summary.days.map(day => day.sales)} /></div><span><b>{summary.successfulOrders}</b><small>Orders</small></span></div><div className="activity-event-meta"><span>Last 7 days</span><b>{money(summary.grossSales)}</b></div></article>
+      <article className="activity-event-card"><span className="activity-event-icon event-icon-purple"><ShoppingBag size={16} /></span><time>Today</time><button className="activity-event-link" onClick={() => onNavigate("Orders")}><h3>{latestOrder ? `New order ${latestOrder.id}` : "Your orders are up to date"}</h3><ArrowUpRight size={14} /></button>{latestOrder && <><p>{latestOrder.customer} ordered {latestOrder.product}</p><div className="activity-event-meta"><span>{latestOrder.payment.split(" ")[0]}</span><b>{money(latestOrder.total)}</b></div></>}</article>
+    </div>
+  </SidePanel>;
+}
+
+type StoreProfile = { name: string; role: string; email: string; phone: string; timezone: string };
+
+function ProfilePanel({ profile, onSave, products, orders, tickets, onClose, onSettings, onSignOut }: { profile: StoreProfile; onSave: (profile: StoreProfile) => void; products: number; orders: number; tickets: number; onClose: () => void; onSettings: () => void; onSignOut: () => void }) {
+  const [view, setView] = useState<"overview" | "edit" | "password">("overview");
+  const [notice, setNotice] = useState("");
+  const initials = profile.name.split(" ").filter(Boolean).slice(0, 2).map(part => part[0]).join("");
+  const footer = view === "overview" ? <div className="profile-account-links"><button onClick={() => { setView("edit"); setNotice(""); }}><UserRound size={16} /><span>Edit information</span><ChevronRight size={16} /></button><button onClick={() => { setView("password"); setNotice(""); }}><LockKeyhole size={16} /><span>Change password</span><ChevronRight size={16} /></button><button onClick={onSettings}><Settings size={16} /><span>Account preferences</span><ChevronRight size={16} /></button><button onClick={onSignOut}><LogOut size={16} /><span>Sign out</span><ChevronRight size={16} /></button></div> : <button className="profile-back-link" onClick={() => { setView("overview"); setNotice(""); }}><ChevronLeft size={16} />Back to profile</button>;
+  return <SidePanel title={view === "overview" ? "My profile" : view === "edit" ? "Edit information" : "Change password"} className="profile-side-panel" footer={footer} onClose={onClose}>
+    {view === "overview" ? <div className="profile-panel-overview"><div className="profile-hero"><div className="profile-avatar-halo"><span className="profile-panel-avatar">{initials}</span><button aria-label="Edit profile" onClick={() => setView("edit")}><UserRound size={14} /></button></div><h3>{profile.name}</h3><p>{profile.role}</p><button className="primary-button" onClick={() => setView("edit")}>Edit profile</button></div><div className="profile-store-stats"><span><b>{products}</b><small>Products</small></span><span><b>{orders}</b><small>Orders</small></span><span><b>{tickets}</b><small>Open tickets</small></span></div><div className="profile-info-section"><h3>Account details</h3><div><Mail size={16} /><span><small>Email</small><b>{profile.email}</b></span></div><div><UserRound size={16} /><span><small>Phone</small><b>{profile.phone || "Not added"}</b></span></div><div><CalendarDays size={16} /><span><small>Time zone</small><b>{profile.timezone}</b></span></div></div>{notice && <p className="profile-save-notice" role="status">{notice}</p>}</div> : view === "edit" ? <form className="store-form" onSubmit={event => { event.preventDefault(); const data = new FormData(event.currentTarget); const name = String(data.get("name")).trim(); if (!name) return; onSave({ name, role: String(data.get("role")).trim(), email: String(data.get("email")).trim(), phone: String(data.get("phone")).trim(), timezone: String(data.get("timezone")) }); setView("overview"); setNotice("Profile updated for this session."); }}><label>Full name<input name="name" defaultValue={profile.name} required maxLength={80} autoComplete="name" /></label><label>Role<input name="role" defaultValue={profile.role} maxLength={60} /></label><label>Email<input name="email" type="email" defaultValue={profile.email} required autoComplete="email" /></label><label>Phone<input name="phone" type="tel" defaultValue={profile.phone} autoComplete="tel" /></label><label>Time zone<select name="timezone" defaultValue={profile.timezone}><option>Africa/Casablanca</option><option>Europe/London</option><option>Europe/Paris</option><option>America/New_York</option><option>America/Los_Angeles</option><option>UTC</option></select></label><button className="primary-button" type="submit">Save changes</button></form> : <div className="profile-password-view"><span className="profile-security-icon"><LockKeyhole size={24} /></span><h3>Password & security</h3><p>Connect an account provider to change your password securely. Password changes are unavailable in this local preview.</p><button className="secondary-button" onClick={onSettings}><Settings size={16} />Account settings</button></div>}
+  </SidePanel>;
 }
 
 function Workspace({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -171,62 +201,61 @@ function ScreenTitle({ children, action, center }: { children: React.ReactNode; 
   return <div className={`screen-title ${center ? "has-center-content" : ""}`}><h1>{children}</h1>{center && <div className="screen-title-center">{center}</div>}{action}</div>;
 }
 
-function StoreDashboard({ orders, tickets, onNavigate, darkMode, setDarkMode }: { orders: StoreOrder[]; tickets: Ticket[]; onNavigate: (screen: Screen) => void; darkMode: boolean; setDarkMode: (mode: boolean) => void }) {
-  return (
-    <Workspace className="home-workspace">
-      <ScreenTitle action={<HomeCalendarDropdown onNavigate={onNavigate} />}>Morning, Violett</ScreenTitle>
-      <div className="home-board">
-        <div className="widget-column">
-          <article className="tile store-activity-tile">
-            <HomeWidgetHead title="Activity" icon={<Activity />} destination="Orders" onNavigate={onNavigate} />
-            <div className="store-activity-feed">
-              {orders.slice(0, 2).map((order) => <button key={order.id} onClick={() => onNavigate("Orders")}><span className="feed-icon"><ShoppingBag size={16} /></span><span><b>New order {order.id}</b><small>{order.customer} · {money(order.total)}</small></span><time>Just now</time></button>)}
-              <button onClick={() => onNavigate("Calendar")}><span className="feed-icon"><Tag size={16} /></span><span><b>Autumn promotion is live</b><small>20% off selected collections</small></span><time>1h ago</time></button>
-              <button onClick={() => onNavigate("Support tickets")}><span className="feed-icon"><TicketIcon size={16} /></span><span><b>{tickets.filter(ticket => ticket.status !== "Resolved").length} tickets need attention</b><small>Keep your customers up to date</small></span><time>Today</time></button>
-            </div>
-          </article>
-          <article className="tile visits-tile">
-            <HomeWidgetHead title="Visits" icon={<ChartColumnIncreasing />} destination="Analytics" onNavigate={onNavigate} />
-            <div className="visits-summary"><strong>8,492</strong><span>+18% <small>This week</small></span></div>
-            <div className="visits-bars" role="img" aria-label="Daily visits: Monday 520, Tuesday 740, Wednesday 630, Thursday 980, Friday 820, Saturday 1120, Sunday 940">
-              {[{ day: "Mon", value: 520 }, { day: "Tue", value: 740 }, { day: "Wed", value: 630 }, { day: "Thu", value: 980 }, { day: "Fri", value: 820 }, { day: "Sat", value: 1120 }, { day: "Sun", value: 940 }].map(({ day, value }) => <div className="visits-bar-column" key={day}><div className="visits-bar-track"><i style={{ height: `${value / 12}%` }} /></div><span>{day}</span></div>)}
-            </div>
-          </article>
-        </div>
-        <div className="widget-column">
-          <article className="tile gradient-tile">
-            <HomeWidgetHead title="Desktop users" icon={<Monitor />} />
-            <div className="desktop-breakdown"><div className="pie-chart" /><div><strong>35%</strong><small>Of all visitors</small></div></div>
-          </article>
-          <article className="tile earnings-tile">
-            <HomeWidgetHead title="Revenue" icon={<CreditCard />} destination="Wallet" onNavigate={onNavigate} />
-            <div className="earnings-content"><b className="earnings-amount">$12,487</b><small className="tile-caption">+$864 compared to last month</small></div>
-            <MiniChart />
-            <span className="revenue-change">↗ +24%<small>This month</small></span>
-          </article>
-        </div>
-        <div className="widget-column funds-column">
-          <article className="tile funds-tile">
-            <HomeWidgetHead title="Funds" icon={<Wallet />} destination="Wallet" onNavigate={onNavigate} />
-            <div className="funds-head"><span>Funds Mngr.</span><span>26 Oct<small>Today</small></span></div>
-            <MiniChart />
-            <div className="funds-stats"><span><i className="ring pink-ring" /><b>+13%</b><small>Earnings</small></span><span><i className="ring gray-ring" /><b>-28%</b><small>Expenses</small></span></div>
-          </article>
-          <div className="bottom-widget-pair">
-            <article className="tile sale-tile">
-              <HomeWidgetHead title="Sales" icon={<ShoppingBag />} destination="Orders" onNavigate={onNavigate} />
-              <div className="compact-tile-content"><strong>New Sale!</strong><small>Alexandria</small></div>
-            </article>
-            <article className="tile dark-mode-tile">
-              <HomeWidgetHead title="Dark mode" icon={<Moon />} />
-              <div className="compact-tile-content"><small>{darkMode ? "Enabled" : "Disabled"}</small></div>
-              <button className={`toggle ${darkMode ? "toggle-on" : ""}`} role="switch" aria-checked={darkMode} aria-label="Toggle dark mode" onClick={() => setDarkMode(!darkMode)}><i /></button>
-            </article>
-          </div>
+function StoreDashboard({ orders, tickets, products, events, onNavigate }: { orders: StoreOrder[]; tickets: Ticket[]; products: Product[]; events: StoreEvent[]; onNavigate: (screen: Screen) => void }) {
+  const [activityIndex, setActivityIndex] = useState(0);
+  const summary = storeOverview(orders, products);
+  const latestSale = summary.latestSale;
+  const openTickets = tickets.filter(ticket => ticket.status !== "Resolved");
+  const promotion = events.filter(event => event.kind === "promotion").sort((a, b) => a.date.localeCompare(b.date))[0];
+  const activityDate = latestSale ? new Date(latestSale.placedAt) : new Date();
+  const activities: { sentence: string; detail: string; destination: Screen; date: Date }[] = [
+    { sentence: latestSale ? `${latestSale.customer} ordered ${latestSale.quantity} × ${latestSale.product}.` : "Your store is ready for its first order.", detail: latestSale ? `Order ${latestSale.id}` : "View orders", destination: "Orders", date: activityDate },
+    { sentence: promotion ? `“${promotion.title}” is scheduled.` : "Plan your next promotion in the store calendar.", detail: promotion ? `${promotion.time} · Calendar` : "Open calendar", destination: "Calendar", date: promotion ? new Date(`${promotion.date}T12:00:00`) : activityDate },
+    { sentence: openTickets.length ? `${openTickets[0].customer} needs help with an order.` : "You’re all caught up with your customer conversations.", detail: `${openTickets.length} open tickets`, destination: "Support tickets", date: activityDate },
+  ];
+  const activity = activities[activityIndex];
+  const maxOrders = Math.max(1, ...summary.days.map(day => day.orders));
+  return <Workspace className="home-workspace">
+    <ScreenTitle action={<HomeCalendarDropdown onNavigate={onNavigate} />}>Morning, Violett</ScreenTitle>
+    <div className="home-board">
+      <div className="widget-column updates-column">
+        <article className="tile store-activity-tile sentence-activity">
+          <HomeWidgetHead title="Store updates" icon={<Activity />} destination={activity.destination} onNavigate={onNavigate} />
+          <p className="activity-sentence">{activity.sentence}</p><button className="activity-detail-link" onClick={() => onNavigate(activity.destination)}>{activity.detail}</button>
+          <div className="activity-bottom"><time dateTime={dateKey(activity.date)}><span>{activity.date.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span><small>{activity.date.toLocaleDateString("en-GB", { weekday: "long" })}</small></time><div className="activity-pagination" role="group" aria-label="Store activity">{activities.map((item, index) => <button key={item.destination} className={index === activityIndex ? "activity-dot-active" : ""} aria-label={`Show ${index === 0 ? "latest order" : index === 1 ? "promotion" : "support update"}`} aria-pressed={index === activityIndex} onClick={() => setActivityIndex(index)}><span /></button>)}</div></div>
+        </article>
+        <article className="tile visits-tile">
+          <HomeWidgetHead title="Order volume" icon={<ChartColumnIncreasing />} destination="Orders" onNavigate={onNavigate} />
+          <div className="visits-summary"><strong>{summary.totalOrders}</strong><span className="home-metric-caption">Last 7 days</span></div>
+          <div className="visits-bars" role="img" aria-label={`Daily orders: ${summary.days.map(day => `${day.date}: ${day.orders}`).join(", ")}`}>{summary.days.map(day => <div className="visits-bar-column" key={day.date}><div className="visits-bar-track"><i title={`${day.label}: ${day.orders} orders`} style={{ height: `${day.orders / maxOrders * 100}%` }} /></div><span>{day.label}</span></div>)}</div>
+        </article>
+      </div>
+      <div className="widget-column">
+        <article className="tile gradient-tile">
+          <HomeWidgetHead title="Fulfilment" icon={<PackageCheck />} destination="Orders" onNavigate={onNavigate} />
+          <div className="desktop-breakdown"><div className="pie-chart fulfilment-pie" style={{ background: `conic-gradient(#f6daee 0 ${summary.fulfilmentPercent}%, #ffffff26 ${summary.fulfilmentPercent}% 100%)` }} /><div><strong>{summary.fulfilmentPercent}%</strong><small>{summary.delivered}/{summary.successfulOrders} delivered</small></div></div>
+        </article>
+        <article className="tile earnings-tile">
+          <HomeWidgetHead title="Gross sales" icon={<CreditCard />} destination="Analytics" onNavigate={onNavigate} />
+          <div className="earnings-content"><b className="earnings-amount">{money(summary.grossSales)}</b><small className="tile-caption">{summary.successfulOrders} orders</small></div>
+          <MiniChart area values={summary.days.map(day => day.sales)} />
+          <span className="revenue-change home-sales-context"><span>Last 7 days</span><small>Avg. {money(summary.averageOrder)}</small></span>
+        </article>
+      </div>
+      <div className="widget-column funds-column">
+        <article className="tile funds-tile">
+          <HomeWidgetHead title="Sales overview" icon={<TrendingUp />} destination="Analytics" onNavigate={onNavigate} />
+          <div className="funds-head"><span>Avg. order</span><span>{money(summary.averageOrder)}<small>Last 7 days</small></span></div>
+          <MiniChart area axes values={summary.days.map(day => day.sales)} />
+          <div className="funds-stats"><span><i className="ring pink-ring" /><b>{summary.successfulOrders}</b><small>Orders</small></span><span><i className="ring gray-ring" /><b>{summary.processing}</b><small>Processing</small></span></div>
+        </article>
+        <div className="bottom-widget-pair">
+          <article className="tile sale-tile sentence-sale"><HomeWidgetHead title="Latest order" icon={<ShoppingBag />} destination="Orders" onNavigate={onNavigate} /><div className="sale-sentence-bottom"><p>{latestSale ? `${latestSale.customer} ordered` : "No orders yet"}</p>{latestSale && <><button onClick={() => onNavigate("Products")}>{latestSale.product}</button><time dateTime={latestSale.placedAt}>{new Date(latestSale.placedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · {money(latestSale.total)}</time></>}</div></article>
+          <article className="tile stock-alert-tile"><HomeWidgetHead title="Stock alerts" icon={<Package />} destination="Products" onNavigate={onNavigate} /><div className="stock-alert-content"><strong>{summary.stockAlerts.length}</strong><p>{summary.stockAlerts.length ? "To restock" : "All stocked"}</p><small>{summary.outOfStock} out of stock</small></div></article>
         </div>
       </div>
-    </Workspace>
-  );
+    </div>
+  </Workspace>;
 }
 
 function HomeCalendarDropdown({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
@@ -323,8 +352,19 @@ function HomeWidgetHead({ title, icon, destination, onNavigate }: { title: strin
   </div>;
 }
 
-function MiniChart() {
-  return <svg className="mini-chart" viewBox="0 0 170 60" aria-label="Funds management trend"><path d="M1 48 C18 45 26 37 39 38 S62 22 75 28 S94 10 109 18 S126 37 139 33 S153 48 169 53" fill="none" stroke="#ce4cb5" strokeWidth="1.5" /><circle cx="109" cy="18" r="2.5" fill="#df65d0" /></svg>;
+function MiniChart({ area = false, axes = false, values }: { area?: boolean; axes?: boolean; values?: number[] }) {
+  const gradientId = useId();
+  const maximum = Math.max(1, ...(values ?? []));
+  const points = values?.map((value, index) => ({ x: 8 + index / Math.max(1, values.length - 1) * 284, y: 144 - value / maximum * 112 }));
+  const curve = points?.length ? points.map((point, index) => index ? `C${(points[index - 1].x + point.x) / 2} ${points[index - 1].y}, ${(points[index - 1].x + point.x) / 2} ${point.y}, ${point.x} ${point.y}` : `M${point.x} ${point.y}`).join(" ") : "M8 106 C32 100 45 88 69 88 S102 64 122 71 S154 36 181 54 S218 91 240 82 S269 103 292 114";
+  const peak = points?.reduce((best, point) => point.y < best.y ? point : best, points[0]) ?? { x: 181, y: 54 };
+  return <svg className={`mini-chart ${axes ? "funds-area-chart" : ""}`} viewBox="0 0 300 160" preserveAspectRatio="none" role="img" aria-label={values ? `Daily sales: ${values.map(value => money(value)).join(", ")}` : "Sales trend"}>
+    <defs><linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#d84dc1" stopOpacity=".26" /><stop offset="65%" stopColor="#ae3fa8" stopOpacity=".07" /><stop offset="100%" stopColor="#ae3fa8" stopOpacity="0" /></linearGradient></defs>
+    {area && <path d={`${curve} L292 152 H8 Z`} fill={`url(#${gradientId})`} />}
+    {axes && <path d="M4 8V152H296" fill="none" stroke="#ffffff24" strokeWidth="1" vectorEffect="non-scaling-stroke" />}
+    <path d={curve} fill="none" stroke="#d64abd" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+    <circle cx={peak.x} cy={peak.y} r="3.5" fill="#e56bce" />
+  </svg>;
 }
 
 function AnalyticsScreen({ orders, onNavigate }: { orders: StoreOrder[]; onNavigate: (screen: Screen) => void }) {
