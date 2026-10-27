@@ -14,9 +14,9 @@ const inter = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Violett — SaaS workspace",
+  title: "Violett — Store manager",
   description:
-    "A polished, dark SaaS dashboard template for your team, analytics, and customers.",
+    "A modern workspace for managing store orders, products, payouts, analytics, and customer support.",
 };
 
 export default function RootLayout({

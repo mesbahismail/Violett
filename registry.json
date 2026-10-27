@@ -8,7 +8,9 @@
       "type": "registry:template",
       "title": "Violett SaaS Dashboard",
       "description": "A complete, responsive SaaS workspace dashboard with analytics, orders, products, activity, and calendar views.",
-      "dependencies": ["lucide-react"],
+      "dependencies": [
+        "lucide-react"
+      ],
       "files": [
         {
           "path": "src/app/page.tsx",
@@ -24,6 +26,16 @@
           "path": "public/violett.svg",
           "type": "registry:file",
           "target": "public/violett.svg"
+        },
+        {
+          "path": "src/app/store-data.ts",
+          "type": "registry:file",
+          "target": "app/store-data.ts"
+        },
+        {
+          "path": "src/app/components/side-panel.tsx",
+          "type": "registry:file",
+          "target": "app/components/side-panel.tsx"
         }
       ]
     }

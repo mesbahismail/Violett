@@ -1,6 +1,8 @@
-# Violett SaaS Dashboard
+# Violett Store Manager
 
-A free, responsive SaaS dashboard template with a dark violet-and-rose theme. The workspace includes KPI cards, a revenue chart, recent activity, searchable orders, product performance, calendar events, notifications, and responsive navigation. Interface icons are from [Lucide](https://lucide.dev/).
+A responsive store manager with a charcoal theme, Inter typography, and violet accents. The workspace includes store activity, searchable orders and full-height detail panels, products with grid/list views, wallet performance and payouts, analytics, customer support tickets, and a month/week/day calendar. Interface icons are from [Lucide](https://lucide.dev/).
+
+The app currently uses sample data. New products, order status changes, support replies, and calendar events are kept for the current session; payments, email delivery, and a backend are not connected.
 
 ## Run locally
 
@@ -10,6 +12,16 @@ npm run dev
 ```
 
 Open [http://localhost:3001](http://localhost:3001). Development output uses `.next-dev` so production builds do not interrupt the running preview.
+
+## Validation
+
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+Tests cover order search/status/sort behavior, calendar boundaries, and rendered store screens.
 
 ## Use as a shadcn registry template
 
