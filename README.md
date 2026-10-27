@@ -1,36 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Violett SaaS Dashboard
 
-## Getting Started
+A free, responsive SaaS dashboard template with a dark violet-and-rose theme. The workspace includes KPI cards, a revenue chart, recent activity, searchable orders, product performance, calendar events, notifications, and responsive navigation. Interface icons are from [Lucide](https://lucide.dev/).
 
-First, run the development server:
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3001](http://localhost:3001). Development output uses `.next-dev` so production builds do not interrupt the running preview.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Use as a shadcn registry template
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The root [registry.json](./registry.json) registers `violett-saas-dashboard` as a `registry:template`. The item includes its page and stylesheet and declares `lucide-react` as a dependency.
 
-## Learn More
+To generate registry item files with the shadcn CLI, run:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npx shadcn@latest build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Publish the generated registry output alongside the app, then install the item with:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx shadcn@latest add https://your-domain.example/r/violett-saas-dashboard.json
+```

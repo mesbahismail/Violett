@@ -1,0 +1,31 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "violett",
+  "homepage": "https://github.com/mesbahismail/Violett",
+  "items": [
+    {
+      "name": "violett-saas-dashboard",
+      "type": "registry:template",
+      "title": "Violett SaaS Dashboard",
+      "description": "A complete, responsive SaaS workspace dashboard with analytics, orders, products, activity, and calendar views.",
+      "dependencies": ["lucide-react"],
+      "files": [
+        {
+          "path": "src/app/page.tsx",
+          "type": "registry:page",
+          "target": "app/page.tsx"
+        },
+        {
+          "path": "src/app/globals.css",
+          "type": "registry:style",
+          "target": "app/globals.css"
+        },
+        {
+          "path": "public/violett.svg",
+          "type": "registry:file",
+          "target": "public/violett.svg"
+        }
+      ]
+    }
+  ]
+}
