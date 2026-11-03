@@ -93,3 +93,23 @@ test("store overview handles an empty store without invalid percentages", () => 
   assert.equal(result.averageOrder, 0); assert.equal(result.fulfilmentPercent, 0);
   assert.equal(result.latestSale, undefined); assert.equal(result.stockAlerts.length, 0);
 });
+
+
+test("calendar accessibility labels use explicit English dates and punctuation", () => {
+  const cases = [
+    [new Date(2026, 9, 1), "Thursday, 1 October 2026"],
+    [new Date(2026, 10, 3), "Tuesday, 3 November 2026"],
+    [new Date(2024, 1, 29), "Thursday, 29 February 2024"],
+    [new Date(2027, 0, 1), "Friday, 1 January 2027"],
+  ];
+  for (const [date, expected] of cases) assert.equal(api.formatCalendarDate(date), expected);
+});
+
+
+test("year view lists twelve months and navigates across years", () => {
+  const anchor = new Date(2026, 10, 3);
+  assert.deepEqual(calendarDates(anchor, "Year").map(dateKey), Array.from({ length: 12 }, (_, month) => `2026-${String(month + 1).padStart(2, "0")}-01`));
+  assert.equal(dateKey(shiftCalendar(anchor, "Year", 1)), "2027-01-01");
+  assert.equal(dateKey(shiftCalendar(anchor, "Year", -1)), "2025-01-01");
+  assert.equal(dateKey(anchor), "2026-11-03");
+});

@@ -15,7 +15,7 @@ export function selectOrders(orders: StoreOrder[], search: string, status: strin
 }
 export const money = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(value);
 export type TicketMessage = { id: string; body: string; sender: "customer" | "agent" };
-export type Ticket = { id: string; customer: string; email: string; subject: string; status: "Open" | "Pending" | "Resolved"; priority: "Normal" | "High"; messages: TicketMessage[] };
+export type Ticket = { id: string; customer: string; email: string; subject: string; status: "Open" | "Pending" | "Resolved"; priority: "Normal" | "High"; archived?: boolean; messages: TicketMessage[] };
 export const initialTickets: Ticket[] = [
   { id: "T-1042", customer: "Sarah Morgan", email: "sarah@example.com", subject: "Where is my order?", status: "Open", priority: "High", messages: [{ id: "1", sender: "customer", body: "Hi! Could you help me check the delivery of order #236?" }, { id: "2", sender: "agent", body: "Of course, Sarah. I’m checking the delivery details for you." }, { id: "3", sender: "customer", body: "Thank you! The tracking link hasn’t updated yet." }] },
   { id: "T-1041", customer: "Megan Bowen", email: "megan@example.com", subject: "Exchange shirt size", status: "Pending", priority: "Normal", messages: [{ id: "1", sender: "customer", body: "Could I exchange my Colorful Shirt for a size L?" }] },
@@ -23,7 +23,7 @@ export const initialTickets: Ticket[] = [
   { id: "T-1039", customer: "Samuel Davis", email: "sam@example.com", subject: "Thanks for your help", status: "Resolved", priority: "Normal", messages: [{ id: "1", sender: "customer", body: "Everything arrived today. Thank you for your help!" }, { id: "2", sender: "agent", body: "You’re very welcome. Enjoy your new boots!" }] },
   { id: "T-1043", customer: "Christopher Shultz", email: "christopher@example.com", subject: "Help with my order", status: "Open", priority: "Normal", messages: [{ id: "1", sender: "customer", body: "Can you help me with my order?" }] },
 ];
-export type CalendarMode = "Month" | "Week" | "Day";
+export type CalendarMode = "Year" | "Month" | "Week" | "Day";
 export type StoreEvent = { id: string; title: string; date: string; time: string; kind: "promotion" | "payout" | "task" };
 export const initialEvents: StoreEvent[] = [
   { id: "1", title: "Autumn promotion launches", date: "2026-10-27", time: "09:00", kind: "promotion" },
@@ -33,7 +33,17 @@ export const initialEvents: StoreEvent[] = [
   { id: "5", title: "November campaign planning", date: "2026-11-02", time: "12:00", kind: "promotion" },
 ];
 export function dateKey(date: Date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`; }
+const calendarWeekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const calendarMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+// Calendar cells represent local calendar dates. Keep their English labels and
+// punctuation identical across server/browser ICU versions during hydration.
+export function formatCalendarDate(date: Date) {
+  return `${calendarWeekdays[date.getDay()]}, ${date.getDate()} ${calendarMonths[date.getMonth()]} ${date.getFullYear()}`;
+}
+
 export function calendarDates(anchor: Date, mode: CalendarMode) {
+  if (mode === "Year") return Array.from({ length: 12 }, (_, month) => new Date(anchor.getFullYear(), month, 1));
   if (mode === "Day") return [new Date(anchor)];
   const first = mode === "Month" ? new Date(anchor.getFullYear(), anchor.getMonth(), 1) : new Date(anchor);
   const offset = (first.getDay() + 6) % 7;
@@ -42,6 +52,7 @@ export function calendarDates(anchor: Date, mode: CalendarMode) {
   return Array.from({ length: count }, (_, index) => new Date(first.getFullYear(), first.getMonth(), first.getDate() + index));
 }
 export function shiftCalendar(anchor: Date, mode: CalendarMode, direction: number) {
+  if (mode === "Year") return new Date(anchor.getFullYear() + direction, 0, 1);
   if (mode === "Month") return new Date(anchor.getFullYear(), anchor.getMonth() + direction, 1);
   return new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() + direction * (mode === "Week" ? 7 : 1));
 }

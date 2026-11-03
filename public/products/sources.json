@@ -1,0 +1,62 @@
+{
+  "shirt": {
+    "url": "https://cdn.dummyjson.com/product-images/mens-shirts/man-plaid-shirt/1.webp",
+    "source": "https://dummyjson.com/products",
+    "name": "Man Plaid Shirt"
+  },
+  "texture": {
+    "url": "https://cdn.dummyjson.com/product-images/mens-shirts/blue-&-black-check-shirt/1.webp",
+    "source": "https://dummyjson.com/products",
+    "name": "Blue & Black Check Shirt"
+  },
+  "tee": {
+    "url": "https://cdn.dummyjson.com/product-images/mens-shirts/gigabyte-aorus-men-tshirt/1.webp",
+    "source": "https://dummyjson.com/products",
+    "name": "Gigabyte Aorus Men Tshirt"
+  },
+  "linen": {
+    "url": "https://cdn.dummyjson.com/product-images/mens-shirts/man-short-sleeve-shirt/1.webp",
+    "source": "https://dummyjson.com/products",
+    "name": "Man Short Sleeve Shirt"
+  },
+  "check": {
+    "url": "https://cdn.dummyjson.com/product-images/mens-shirts/men-check-shirt/1.webp",
+    "source": "https://dummyjson.com/products",
+    "name": "Men Check Shirt"
+  },
+  "trainers": {
+    "url": "https://cdn.dummyjson.com/product-images/mens-shoes/puma-future-rider-trainers/1.webp",
+    "source": "https://dummyjson.com/products",
+    "name": "Puma Future Rider Trainers"
+  },
+  "sneakers": {
+    "url": "https://cdn.dummyjson.com/product-images/mens-shoes/nike-air-jordan-1-red-and-black/1.webp",
+    "source": "https://dummyjson.com/products",
+    "name": "Nike Air Jordan 1 Red And Black"
+  },
+  "dress": {
+    "url": "https://cdn.dummyjson.com/product-images/tops/gray-dress/1.webp",
+    "source": "https://dummyjson.com/products",
+    "name": "Gray Dress"
+  },
+  "bag": {
+    "url": "https://cdn.dummyjson.com/product-images/womens-bags/heshe-women's-leather-bag/1.webp",
+    "source": "https://dummyjson.com/products",
+    "name": "Heshe Women's Leather Bag"
+  },
+  "backpack": {
+    "url": "https://cdn.dummyjson.com/product-images/womens-bags/white-faux-leather-backpack/1.webp",
+    "source": "https://dummyjson.com/products",
+    "name": "White Faux Leather Backpack"
+  },
+  "jeans": {
+    "url": "https://images.unsplash.com/photo-1714143136372-ddaf8b606da7?auto=format&fit=crop&w=800&q=85",
+    "source": "https://unsplash.com/photos/a-pair-of-blue-jeans-on-a-white-background-9yoXrG6Er_g",
+    "name": "Denim Jeans"
+  },
+  "boots": {
+    "url": "https://gabucci.co.uk/wp-content/uploads/2022/10/1626-lacuzzo-brown-leather-elesticated-boot-scaled.jpg",
+    "source": "https://gabucci.co.uk/shop/johnwhite-brown-leather-chelsea-boot/",
+    "name": "Chelsea Boots"
+  }
+}
