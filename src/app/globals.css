@@ -58,7 +58,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 .rail-dot { position: absolute; top: 20px; right: 16px; width: 4px; height: 4px; border-radius: 50%; background: var(--pink); }
 
 .screen-content { min-height: 100vh; margin-left: 60px; padding-top: 76px; }
-.workspace { width: min(1640px, 100%); min-height: calc(100vh - 76px); margin: 0 auto; padding: 24px 32px 48px; }
+.workspace { width: 100%; min-height: calc(100vh - 76px); margin: 0; padding: 24px 32px 48px; }
 .home-workspace { display: flex; height: calc(100svh - 76px); flex-direction: column; }
 .screen-title { display: flex; min-height: 52px; align-items: center; gap: 8px; margin: 0 4px 20px; }
 .screen-title h1 { font-size: 24px; font-weight: 400; letter-spacing: .05px; }
@@ -378,7 +378,7 @@ button { transition: background-color .16s, color .16s, box-shadow .16s; }
 .rail-active::after { top: 4px; bottom: 4px; width: 2px; }
 .rail-dot { display: none; }
 .screen-content { margin-left: var(--rail-width); padding-top: var(--header-height); }
-.workspace { width: 100%; max-width: 1440px; min-height: calc(100svh - 64px); padding: 28px 32px 32px; }
+.workspace { width: 100%; max-width: none; min-height: calc(100svh - 64px); padding: 28px 32px 32px; }
 .home-workspace { height: calc(100svh - var(--header-height)); min-height: 480px; }
 .home-workspace > .screen-title { flex-shrink: 0; }
 .screen-title { min-height: 32px; margin: 0 12px 24px; gap: 8px; }
@@ -835,8 +835,8 @@ html, body { width: 100%; height: 100%; min-height: 0; overflow: hidden; }
 .violett-app { height: 100dvh; min-height: 0; overflow: hidden; }
 .screen-content { position: fixed; inset: var(--header-height) 0 0 var(--rail-width); height: auto; min-height: 0; margin: 0; padding: 0; overflow: hidden; }
 .workspace, .workspace.home-workspace, .workspace.orders-workspace {
-  display: flex; flex-direction: column; width: 100%; max-width: 1440px;
-  height: 100%; min-height: 0; margin: 0 auto; padding: var(--page-padding);
+  display: flex; flex-direction: column; width: 100%; max-width: none;
+  height: 100%; min-height: 0; margin: 0; padding: var(--page-padding);
   gap: var(--page-content-gap); overflow: hidden; background: transparent; border-radius: 0;
 }
 .workspace > .screen-title { display: flex; flex: 0 0 var(--page-title-height); min-height: var(--page-title-height); align-items: center; flex-wrap: nowrap; gap: 16px; margin: 0; }
@@ -1204,7 +1204,12 @@ select option { background: #292929; color: #eee; }
 .support-ticket small { overflow: hidden; color: #aaa; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .support-ticket em { color: #777; font-size: 9px; font-style: normal; }
 .support-ticket.ticket-selected { background: #ffffff06; box-shadow: inset -2px 0 #d34bbc; }
-.ticket-priority-dot { width: 4px; height: 4px; margin-top: 4px; border-radius: 50%; background: #d89462; }
+.support-ticket-count { margin-left: 8px; opacity: .45; font-size: .75em; font-weight: 400; }
+.support-ticket-avatar { position: relative; background: var(--card-dark); color: var(--muted); }
+.ticket-status-dot { position: absolute; right: -1px; bottom: -1px; width: 10px; height: 10px; border: 2px solid var(--card); border-radius: 50%; }
+.ticket-status-open { background: var(--pink); }
+.ticket-status-pending { background: #89509f; }
+.ticket-status-resolved { background: var(--green); }
 .support-conversation { display: flex; min-height: 0; min-width: 0; flex-direction: column; padding: 24px; border: 1px solid #ffffff07; border-radius: 4px; background: #222; }
 .support-chat-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-shrink: 0; padding-bottom: 20px; border-bottom: 1px solid #ffffff0c; }
 .support-chat-head > div { min-width: 0; }
@@ -1443,7 +1448,7 @@ select option { background: #292929; color: #eee; }
 .activity-event-icon { position: absolute; top: 16px; left: -36px; display: grid; width: 32px; height: 32px; place-items: center; border: 3px solid #2b2b2b; border-radius: 50%; color: #f5e1f4; }
 .event-icon-pink { background: linear-gradient(135deg, #e94baf, #ca43cf); }
 .event-icon-purple { background: linear-gradient(135deg, #b341e0, #8b46d8); }
-.activity-event-card > time { display: block; margin-bottom: 8px; color: #999; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
+.activity-event-card > time { display: block; margin-top: 4px; color: #999; font-size: max(9px, calc(var(--text-xs) - 1px)); line-height: 1.4; }
 .activity-event-card h3 { color: #ddd; font-size: 11px; font-weight: 500; line-height: 1.7; }
 .activity-event-card > p { margin-top: 8px; color: #999; font-size: 10px; line-height: 1.7; }
 .activity-event-link { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; width: 100%; padding: 0; background: transparent; color: #aaa; text-align: left; }
@@ -1495,7 +1500,7 @@ button:focus-visible, summary:focus-visible, select:focus-visible, textarea:focu
 .product-image .edit-round { z-index: 1; }
 .product-detail-art { height: 280px; }
 .products-list .catalog-photo { padding: 4px; }
-.catalog-pagination { position: sticky; z-index: 2; bottom: 0; display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; gap: 16px; margin-top: auto; padding: 16px 0 0; border-top: 1px solid var(--surface-border); background: var(--page); color: var(--muted); font-size: var(--text-xs); }
+.catalog-pagination { position: sticky; z-index: 2; bottom: 0; display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; gap: 16px; margin-top: auto; padding: 16px 0 0; border-top: 1px solid var(--surface-border); background-color: var(--page); background-image: var(--page-gradient); background-attachment: fixed; color: var(--muted); font-size: var(--text-xs); }
 .catalog-pagination label, .catalog-pagination > div { display: flex; align-items: center; gap: 8px; }
 .catalog-pagination label { margin-left: auto; }
 .catalog-pagination select { padding: 6px 8px; border: 1px solid var(--surface-border); border-radius: 4px; background: var(--card); }
@@ -1505,10 +1510,10 @@ button:focus-visible, summary:focus-visible, select:focus-visible, textarea:focu
 /* Give the large widgets 60% and the smaller charts 40% of the available height. */
 .wallet-store-layout, .analytics-layout { grid-template-rows: minmax(0, 3fr) minmax(0, 2fr); }
 .wallet-store-layout > .widget, .analytics-layout > .widget { padding: 24px; border-radius: var(--panel-radius); }
-.balance-summary { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 20px; }
+.balance-summary { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-top: 20px; }
 .balance-summary .store-balance-number { margin: 0 0 4px; font-size: clamp(28px, 2.8vw, 40px); }
 .balance-summary .metric-change { font-size: var(--text-xs); }
-.balance-summary .wallet-balance-legend { flex-direction: column; align-items: flex-end; flex-shrink: 0; gap: 12px; margin: 0; padding: 0; border: 0; }
+.balance-summary .wallet-balance-legend { flex-direction: row; align-items: center; flex-shrink: 0; gap: 24px; margin: 0; padding: 0; border: 0; }
 .wallet-balance-legend > span { font-size: var(--text-xs); }
 .wallet-balance-legend b { min-width: 32px; text-align: right; }
 .wallet-performance .balance-bottom { align-items: center; }
@@ -1559,7 +1564,13 @@ button:focus-visible, summary:focus-visible, select:focus-visible, textarea:focu
 .settings-main .setting-row { min-height: 88px; padding: 20px 0; gap: 24px; border-color: var(--surface-border); }
 .setting-row > span:first-child small { margin-top: 6px; font-size: var(--text-xs); letter-spacing: 0; }
 .setting-value { color: var(--muted); font-size: var(--text-sm); text-align: right; }
-.settings-main .range-setting { width: 40%; accent-color: var(--pink); }
+.settings-main .range-setting { appearance: none; -webkit-appearance: none; width: 40%; min-width: 96px; height: 28px; flex-shrink: 0; margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; cursor: pointer; touch-action: pan-y; accent-color: var(--pink); }
+.settings-main .range-setting::-webkit-slider-runnable-track { height: 4px; border: 0; border-radius: 999px; background: var(--line); }
+.settings-main .range-setting::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 16px; height: 16px; margin-top: -6px; border: 0; border-radius: 50%; background: var(--pink); cursor: grab; }
+.settings-main .range-setting::-moz-range-track { height: 4px; border: 0; border-radius: 999px; background: var(--line); }
+.settings-main .range-setting::-moz-range-thumb { width: 16px; height: 16px; border: 0; border-radius: 50%; background: var(--pink); cursor: grab; }
+.settings-main .range-setting:active::-webkit-slider-thumb { cursor: grabbing; }
+.settings-main .range-setting:active::-moz-range-thumb { cursor: grabbing; }
 .typography-preview { padding: 28px; margin-top: 28px; background: var(--card); border-radius: var(--panel-radius); }
 .typography-preview > small { font-size: var(--text-xs); color: var(--subtle); letter-spacing: 1px; }
 .typography-preview h3 { margin-top: 20px; font-size: var(--text-title); font-weight: 400; }
@@ -1587,6 +1598,9 @@ button:focus-visible, summary:focus-visible, select:focus-visible, textarea:focu
 .anchored-popover::before { content: ""; position: absolute; top: -7px; right: 18px; width: 13px; height: 13px; transform: rotate(45deg); background: var(--card); border-top: 1px solid #ffffff12; border-left: 1px solid #ffffff12; }
 .popover-heading { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px; border-bottom: 1px solid var(--surface-border); }
 .popover-heading small { display: block; margin-top: 8px; color: var(--muted); font-size: var(--text-xs); }
+.popover-title-count { margin-left: 8px; opacity: .5; font-weight: 400; }
+.activity-side-panel .popover-heading > .icon-button { flex-shrink: 0; background: #ffffff08; }
+.activity-side-panel .popover-heading > .icon-button:hover { background: #ffffff12; }
 .popover-body { min-height: 0; overflow: auto; padding: 20px; overscroll-behavior: contain; }
 .anchored-popover > footer { flex-shrink: 0; padding: 12px; border-top: 1px solid var(--surface-border); }
 .anchored-popover.create-menu { width: 248px; right: -4px; }
@@ -1661,7 +1675,7 @@ button:focus-visible, summary:focus-visible, select:focus-visible, textarea:focu
 .performance-totals b { display: block; margin-bottom: 4px; color: var(--text); font-size: var(--text-lg); font-weight: 500; }
 .store-side-panel h2, .dialog-head h2, .dialog-head b { font-size: var(--text-base); font-weight: 500; }
 .store-side-panel p, .store-form, .new-product-fields, .activity-mark-read { font-size: var(--text-sm); }
-.store-side-panel small, .activity-event-card time, .activity-event-card > p { font-size: var(--text-xs); }
+.store-side-panel small, .activity-event-card > p { font-size: var(--text-xs); }
 .activity-event-card h3 { font-size: var(--text-sm); }
 @media (max-width: 1100px) {
   .home-board.with-performance-widget { grid-template-columns: repeat(3, minmax(0, 1fr)); flex: none; }
@@ -1678,7 +1692,8 @@ button:focus-visible, summary:focus-visible, select:focus-visible, textarea:focu
 
 /* Calendar uses the shared page header above its own content panel. */
 .workspace.calendar-workspace { gap: var(--page-content-gap); }
-.calendar-workspace > .calendar-heading { position: relative; z-index: 3; padding: 0; background: transparent; }
+.calendar-workspace > .calendar-heading { position: relative; z-index: 3; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); padding: 0; background: transparent; }
+.calendar-new-event { justify-self: end; }
 .calendar-heading-title { display: flex; min-width: 0; align-items: center; gap: 12px; }
 .calendar-view-menu { position: relative; }
 .calendar-view-menu > summary { display: flex; align-items: center; gap: 4px; color: var(--subtle); font-size: var(--text-title); line-height: 32px; list-style: none; cursor: pointer; }
@@ -1687,8 +1702,9 @@ button:focus-visible, summary:focus-visible, select:focus-visible, textarea:focu
 .calendar-view-options { position: absolute; z-index: 5; top: calc(100% + 12px); left: -16px; display: flex; flex-direction: column; min-width: 164px; padding: 12px 0; border: 1px solid #ffffff05; border-radius: 12px; background: #3c3c3cf5; box-shadow: 0 16px 36px #0004; backdrop-filter: blur(16px); }
 .calendar-view-options > button { padding: 6px 20px; background: transparent; color: var(--muted); text-align: left; font-size: var(--text-title); font-weight: 400; }
 .calendar-view-options > button:hover, .calendar-view-options > button.selected { background: #ffffff06; color: var(--text); }
-.calendar-date-navigation { display: flex; align-items: center; gap: 12px; margin-left: auto; }
-.calendar-date-navigation > span { text-align: center; color: var(--text); font-size: var(--text-lg); white-space: nowrap; }
+.calendar-date-navigation { display: flex; align-items: center; justify-content: center; justify-self: center; gap: 12px; margin: 0; }
+.calendar-date-navigation > span { text-align: center; color: var(--text); font-family: var(--font-display); font-size: var(--text-title); font-weight: 400; line-height: 32px; letter-spacing: 0; white-space: nowrap; }
+.calendar-date-navigation .calendar-label-year { color: var(--subtle); }
 .calendar-date-navigation .icon-button { display: grid; width: 24px; height: 24px; flex-shrink: 0; place-items: center; border: 1px solid #ffffff40; border-radius: 50%; }
 .calendar-workspace > .page-body { gap: 0; border-radius: var(--panel-radius); background: var(--card); scrollbar-gutter: auto; }
 .calendar-workspace .store-calendar, .calendar-workspace .calendar-agenda { border: 0; border-radius: 0; }
@@ -1711,17 +1727,22 @@ button:focus-visible, summary:focus-visible, select:focus-visible, textarea:focu
 .calendar-mini-grid > button:hover { background: #d745ce25; }
 .calendar-mini-grid .has-events::after { content: ""; position: absolute; bottom: 2px; width: 3px; height: 3px; border-radius: 50%; background: var(--pink); }
 .light-mode .calendar-view-options { background: var(--card); }
-@media (max-width: 1100px) { .calendar-year-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; } }
+@media (max-width: 1100px) {
+  .calendar-year-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .calendar-workspace > .calendar-heading { flex: 0 0 auto; grid-template-columns: minmax(0, 1fr) auto; }
+  .calendar-new-event { grid-column: 2; grid-row: 1; }
+  .calendar-date-navigation { grid-column: 1 / -1; grid-row: 2; }
+}
 @media (max-width: 800px) {
   .calendar-workspace > .calendar-heading { gap: 16px; }
   .calendar-date-navigation { gap: 8px; }
-  .calendar-date-navigation > span { font-size: var(--text-sm); }
   .calendar-year-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 12px 20px 24px; }
 }
 @media (max-width: 600px) {
   .calendar-workspace > .calendar-heading { flex: 0 0 auto; flex-wrap: wrap; gap: 12px; }
   .calendar-heading-title { width: 100%; gap: 8px; }
-  .calendar-date-navigation { width: 100%; justify-content: space-between; }
+  .calendar-date-navigation { width: 100%; }
+  .calendar-date-navigation > span { white-space: normal; }
   .calendar-view-options { min-width: 144px; }
   .calendar-view-options > button { font-size: 20px; }
   .calendar-year-grid { gap: 24px 12px; padding: 12px; }
